@@ -1,4 +1,5 @@
 import java.io.DataOutputStream;
+import java.util.regex.Pattern;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -18,10 +19,18 @@ public class Server {
 		String serverAddress = "127.0.0.1";
 		int serverPort = 5000;
 		
+		
+		while (!Server.validateIpAddress(serverAddress)){
+            Server.log("Wrong IP Address. Enter another one:");
+        	serverAddress = System.console().readLine();
+        }
+		
 		// creation de la connexion pour communiquer avec les clients
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
+		
+		
 		
 		//Assotiation de ladresse et du port a la connexion
 		listener.bind(new InetSocketAddress(serverIP, serverPort));
@@ -69,4 +78,17 @@ public class Server {
 			}
 		}
 	}
+	
+	private static final Pattern PATTERN = Pattern.compile(
+			"^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+	
+	public static boolean validateIpAddress(final String ipAdress) {
+		return PATTERN.matcher(ipAdress).matches();
+	}
+	
+   private static void log(String message) {
+        System.out.println(message);
+    }
+
+	
 }

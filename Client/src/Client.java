@@ -8,14 +8,12 @@ public class Client
 {
 	private static Socket socket;
 	
+	//Fonction pour print sur le server
+	private static void log(String message) {
+        System.out.println(message);
+    }
 	
-	private static final Pattern PATTERN = Pattern.compile(
-			"^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"
-	);
-	
-	public static boolean validateIpAddress(final String ipAdress) {
-		return PATTERN.matcher(ipAdress).matches();
-	}
+
 	/*
 	 * Application Client
 	 */
@@ -57,13 +55,27 @@ public class Client
 	
 	public static void main(String[] args) throws Exception
 	{
-		askIp();
-	
-		askPort();
-		
-		// Adresse et port du serveur
-		String serverAddress = "127.0.0.1";
+		//IP address 
+		String serverAddress = "127.168.0.1";
 		int port = 5000;
+		if (!(System.console() == null)) {
+			Client.log("Enter IP Address of the Server:");
+			serverAddress = System.console().readLine();
+			while (!Client.validateIpAddress(serverAddress)){
+				Client.log("Wrong IP Address. Enter another one:");
+	        	serverAddress = System.console().readLine();
+	        }
+			
+			//Port
+	        Client.log("Enter Port for the server :");
+	        port = Integer.parseInt(System.console().readLine());
+	        while (!Client.validatePort(port)){
+	        	Client.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
+	            port = Integer.parseInt(System.console().readLine());
+	        }
+		} 
+		else 
+			System.out.format("No console was found, default values were assigned%n");
 		
 		// Création d'une nouvelle connexion avec le serveur
 		socket = new Socket(serverAddress, port);
@@ -79,5 +91,24 @@ public class Client
 		
 		// Fermeture de la connexion avec le serveur
 		socket.close();
+	}
+	
+	private static final Pattern PATTERN = Pattern.compile(
+			"^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"
+	);
+	
+	//Fonctions en lien avec la validation de l'adresse IP
+	public static boolean validateIpAddress(final String ipAdress) {
+		return PATTERN.matcher(ipAdress).matches();
+	}
+	
+	//Fonctions en lien avec la validation du port entre 5000 et 5500
+	public static boolean validatePort(final int port) {
+		if (port >= 5000 && port <= 5500){
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }

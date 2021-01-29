@@ -10,6 +10,12 @@ public class Server {
 	
 	private static ServerSocket listener;
 	
+	//Fonction pour print sur le server
+	private static void log(String message) {
+        System.out.println(message);
+    }
+	
+
 	public static void main(String[] args) throws Exception
 	{
 		// compteur compte a chaque connexion dun client
@@ -88,12 +94,6 @@ public class Server {
 			}
 		}
 	}
-	
-	//Fonction pour print sur le server
-	private static void log(String message) {
-        System.out.println(message);
-    }
-	
 	
 	//Fonctions en lien avec la validation de l'adresse IP
 	private static final Pattern PATTERN = Pattern.compile(

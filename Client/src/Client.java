@@ -70,7 +70,7 @@ public class Client
 	        Client.log("Enter Port for the server :");
 	        port = Integer.parseInt(System.console().readLine());
 	        while (!Client.validatePort(port)){
-	        	Client.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
+	        	Client.log("Wrong Port. Should be between 5000 and 5050. Enter another one:");
 	            port = Integer.parseInt(System.console().readLine());
 	        }
 		} 

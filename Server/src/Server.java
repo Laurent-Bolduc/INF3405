@@ -1,9 +1,9 @@
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import java.util.regex.Pattern;
 
 public class Server {
@@ -15,25 +15,28 @@ public class Server {
 		// compteur compte a chaque connexion dun client
 		int clientNumber = 0;
 		
-//		//Adresse et port du serveur
-//		String serverAddress = "127.0.0.1";
-//		int serverPort = 5000;
-		
 		//IP address 
-        Server.log("Enter IP Address of the Server:");
-  	    String serverAddress = System.console().readLine();
-		while (!Server.validateIpAddress(serverAddress)){
-            Server.log("Wrong IP Address. Enter another one:");
-        	serverAddress = System.console().readLine();
-        }
-		
-		//Port
-        Server.log("Enter Port for the server :");
-        int port = Integer.parseInt(System.console().readLine());
-        while (!Server.validatePort(port)){
-            Server.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
-            port = Integer.parseInt(System.console().readLine());
-        }
+		String serverAddress = "127.168.0.1";
+		int port = 5000;
+		if (!(System.console() == null)) {
+			Server.log("Enter IP Address of the Server:");
+			serverAddress = System.console().readLine();
+			while (!Server.validateIpAddress(serverAddress)){
+	            Server.log("Wrong IP Address. Enter another one:");
+	        	serverAddress = System.console().readLine();
+	        }
+			
+			//Port
+	        Server.log("Enter Port for the server :");
+	        port = Integer.parseInt(System.console().readLine());
+	        while (!Server.validatePort(port)){
+	            Server.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
+	            port = Integer.parseInt(System.console().readLine());
+	        }
+		} 
+		else 
+			System.out.format("No console was found, default values were assigned%n");
+        
 		
 		//Assotiation de ladresse et du port a la connexion
      // creation de la connexion pour communiquer avec les clients
@@ -42,7 +45,7 @@ public class Server {
  		listener.setReuseAddress(true);
 		listener.bind(new InetSocketAddress(serverIP, port));
 		
-		System.out.format("The server is running on %s:%d%n", serverAddress, serverAddress);
+		System.out.format("The server is running on %s:%d%n", serverAddress, port);
 		
 		try {
 			// Important: la fonction accept() est bloquante : attend qu'un prochain client se connecte

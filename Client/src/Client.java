@@ -1,4 +1,5 @@
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -84,13 +85,18 @@ public class Client
 		
 		// Création d'un canal entrant pour recevoir les messages envoyés par le serveur
 		DataInputStream in = new DataInputStream(socket.getInputStream());
-		
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
 		// Attente de la réception d'un message envoyé par le serveur sur le canal
 		String helloMessageFromServer = in.readUTF();
 		System.out.println(helloMessageFromServer);
 		
+		while (true) {
+			out.writeUTF(System.console().readLine());		 
+		}
+
+		
 		// Fermeture de la connexion avec le serveur
-		socket.close();
 	}
 	
 	private static final Pattern PATTERN = Pattern.compile(

@@ -1,10 +1,13 @@
 import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.regex.Pattern;
+
+import javax.imageio.spi.ImageInputStreamSpi;
 
 public class Server {
 	
@@ -79,19 +82,63 @@ public class Server {
 		
 		public void run() {
 			try {
+				DataInputStream in = new DataInputStream(socket.getInputStream());
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+				out.writeUTF("Hello from server - you are client#" + clientNumber);		 
 				
-				out.writeUTF("Hello from server - you are client#" + clientNumber);
-			}catch(IOException e) {
+				commandSelector(in, out);
+
+				} catch(Exception e) {
 				System.out.println("Error handling client#" + clientNumber + ": " + e);
-			}finally {
+			} finally {
 				try {
 					socket.close();
-				}catch (IOException e) {
+				} catch (IOException e) {
 					System.out.println("Couldn't close the socket, what's going on?");
 				}
 				System.out.println("Connection with client#" + clientNumber + " closed");
 			}
+		}
+		
+		public void commandSelector(DataInputStream in, DataOutputStream out) throws Exception {
+			int command = 0;
+			String line = "";
+			String[] inputs = new String[] {};
+			while(command == 0) {
+
+				if (line == "") {
+					try {
+					line = in.readUTF();
+					inputs = line.split(" ");
+					System.out.println(line);
+					} catch(Exception e) {
+					}
+				}
+				if (inputs.length == 0) continue;
+				
+				switch(inputs[0]) {
+				case "cd":
+					cdCommand(out, inputs);
+					break;
+				case "ls":
+					break;
+				case "mkdir":
+					break;
+				default:
+					System.out.println("Command not found, type help for help");
+					break;
+				}
+				line = "";
+				inputs = new String[] {};
+			}
+		}
+		
+		public void cdCommand(DataOutputStream out, String[] inputs) throws Exception {
+			if (inputs.length == 1) {
+				out.writeUTF("No directory name was typed");
+				return;
+			}
+			System.out.println(inputs[1]);
 		}
 	}
 	

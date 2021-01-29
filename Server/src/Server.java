@@ -36,7 +36,7 @@ public class Server {
 	        Server.log("Enter Port for the server :");
 	        port = Integer.parseInt(System.console().readLine());
 	        while (!Server.validatePort(port)){
-	            Server.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
+	            Server.log("Wrong Port. Should be between 5000 and 5050. Enter another one:");
 	            port = Integer.parseInt(System.console().readLine());
 	        }
 		} 

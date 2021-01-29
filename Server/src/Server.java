@@ -1,10 +1,10 @@
-import java.io.DataOutputStream;
-import java.util.regex.Pattern;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import java.util.regex.Pattern;
 
 public class Server {
 	
@@ -15,27 +15,34 @@ public class Server {
 		// compteur compte a chaque connexion dun client
 		int clientNumber = 0;
 		
-		//Adresse et port du serveur
-		String serverAddress = "127.0.0.1";
-		int serverPort = 5000;
+//		//Adresse et port du serveur
+//		String serverAddress = "127.0.0.1";
+//		int serverPort = 5000;
 		
-		
+		//IP address 
+        Server.log("Enter IP Address of the Server:");
+  	    String serverAddress = System.console().readLine();
 		while (!Server.validateIpAddress(serverAddress)){
             Server.log("Wrong IP Address. Enter another one:");
         	serverAddress = System.console().readLine();
         }
 		
-		// creation de la connexion pour communiquer avec les clients
-		listener = new ServerSocket();
-		listener.setReuseAddress(true);
-		InetAddress serverIP = InetAddress.getByName(serverAddress);
-		
-		
+		//Port
+        Server.log("Enter Port for the server :");
+        int port = Integer.parseInt(System.console().readLine());
+        while (!Server.validatePort(port)){
+            Server.log("Wrong Port. Should be between 5000 and 5500. Enter another one:");
+            port = Integer.parseInt(System.console().readLine());
+        }
 		
 		//Assotiation de ladresse et du port a la connexion
-		listener.bind(new InetSocketAddress(serverIP, serverPort));
+     // creation de la connexion pour communiquer avec les clients
+ 		InetAddress serverIP = InetAddress.getByName(serverAddress);
+ 		listener = new ServerSocket();
+ 		listener.setReuseAddress(true);
+		listener.bind(new InetSocketAddress(serverIP, port));
 		
-		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
+		System.out.format("The server is running on %s:%d%n", serverAddress, serverAddress);
 		
 		try {
 			// Important: la fonction accept() est bloquante : attend qu'un prochain client se connecte
@@ -79,6 +86,13 @@ public class Server {
 		}
 	}
 	
+	//Fonction pour print sur le server
+	private static void log(String message) {
+        System.out.println(message);
+    }
+	
+	
+	//Fonctions en lien avec la validation de l'adresse IP
 	private static final Pattern PATTERN = Pattern.compile(
 			"^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 	
@@ -86,9 +100,17 @@ public class Server {
 		return PATTERN.matcher(ipAdress).matches();
 	}
 	
-   private static void log(String message) {
-        System.out.println(message);
-    }
+	
+	//Fonctions en lien avec la validation du port entre 5000 et 5500
+		public static boolean validatePort(final int port) {
+			if (port >= 5000 && port <= 5500){
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+   
 
 	
 }

@@ -1,4 +1,5 @@
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -108,10 +109,10 @@ public class Server {
 
 				if (line == "") {
 					try {
-					line = in.readUTF();
-					inputs = line.split(" ");
-					System.out.println(line);
-					} catch(Exception e) {
+						line = in.readUTF();
+						inputs = line.split(" ");
+							System.out.println(line);
+						} catch(Exception e) {
 					}
 				}
 				if (inputs.length == 0) continue;
@@ -123,9 +124,10 @@ public class Server {
 				case "ls":
 					break;
 				case "mkdir":
+					mkdirCommand(out, inputs);
 					break;
 				default:
-					System.out.println("Command not found, type help for help");
+					out.writeUTF("Command not found, type help for help");
 					break;
 				}
 				line = "";
@@ -135,13 +137,33 @@ public class Server {
 		
 		public void cdCommand(DataOutputStream out, String[] inputs) throws Exception {
 			if (inputs.length == 1) {
+				out.writeUTF("No directory name was typed\n");
+				return;
+			}
+		}
+		
+		public void mkdirCommand(DataOutputStream out, String[] inputs) throws Exception {
+//			if (inputs.length == 1) {
+//				out.writeUTF("No directory name was typed");
+//				return;
+//			}
+//			System.out.println(inputs[1]);
+			
+			if (inputs.length == 1) {
 				out.writeUTF("No directory name was typed");
 				return;
 			}
-			System.out.println(inputs[1]);
+			File file = new File("C:\\Users\\vlada\\Desktop\\" + inputs[1]);
+			
+			if(file.mkdir()) {
+				System.out.println("work");
+				out.writeUTF("Directory created\n");
+			} else {
+				System.out.println("pas work");
+				out.writeUTF("An Error has Occurred\n");
+			}
 		}
 	}
-	
 	//Fonctions en lien avec la validation de l'adresse IP
 	private static final Pattern PATTERN = Pattern.compile(
 			"^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");

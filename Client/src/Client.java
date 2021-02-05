@@ -92,10 +92,12 @@ public class Client
 		System.out.println(helloMessageFromServer);
 		
 		while (true) {
-			out.writeUTF(System.console().readLine());		 
+			out.writeUTF(System.console().readLine());
+			if(in != null) {
+				System.out.print(in.readUTF());
+			}
 		}
 
-		
 		// Fermeture de la connexion avec le serveur
 	}
 	

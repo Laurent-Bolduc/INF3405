@@ -78,24 +78,24 @@ public class Client
 		else 
 			System.out.format("No console was found, default values were assigned%n");
 		
-		// Création d'une nouvelle connexion avec le serveur
+		// Crï¿½ation d'une nouvelle connexion avec le serveur
 		socket = new Socket(serverAddress, port);
 		
 		System.out.format("The server is running on %s:%d%n", serverAddress, port);
 		
-		// Création d'un canal entrant pour recevoir les messages envoyés par le serveur
+		// Crï¿½ation d'un canal entrant pour recevoir les messages envoyï¿½s par le serveur
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-		// Attente de la réception d'un message envoyé par le serveur sur le canal
+		// Attente de la rï¿½ception d'un message envoyï¿½ par le serveur sur le canal
 		String helloMessageFromServer = in.readUTF();
 		System.out.println(helloMessageFromServer);
 		
 		while (true) {
-			out.writeUTF(System.console().readLine());
-			if(in != null) {
-				System.out.print(in.readUTF());
-			}
+			out.writeUTF(System.console().readLine());		 
+			String serverComs = in.readUTF();
+			if (!serverComs.isEmpty())
+				System.out.println(serverComs);
 		}
 
 		// Fermeture de la connexion avec le serveur

@@ -144,8 +144,11 @@ public class Server {
 				case "upload":
 					uploadFile(out, inputs);
 					break;
+				case "download":
+					downloadFile(out, inputs);
+					break;
 				default:
-					out.writeUTF("Command not found, type help for help");
+					out.writeUTF("Command not found, type help for help\n");
 					break;
 				}
 				line = "";
@@ -169,7 +172,7 @@ public class Server {
 				System.out.println("HEAD on " + splitPath[splitPath.length - 2]);				
 			}
 			else if (!lsCommand(out, inputs, true).contains(inputs[1])) {
-				out.writeUTF("No directory with that name was found");
+				out.writeUTF("No directory with that name was found\n");
 				return;
 			}
 			else {
@@ -223,26 +226,63 @@ public class Server {
 		public void uploadFile(DataOutputStream out, String[] inputs) throws Exception {
 			//create socket
 			if (inputs.length == 1) {
-				out.writeUTF("No directory name was typed");
+				out.writeUTF("No directory name was typed\n");
 				return;
 			}else {
 				String fileName = inputs[1];
+				String filePath = path+fileName;
 				
 				System.out.println(fileName);
-//				Socket socket = new Socket("127.0.0.1", 4444);
-//				
-				File file = new File(fileName);
+				System.out.println(filePath);
+				
+				File file = new File(filePath);
 				long length = file.length();
 				System.out.println(length);
-//				
-//				byte[] bytes = new byte[16*2024];
-//				
-//				InputStream in = new FileInputStream(file);
-				//OutputStream out = socket.getOutputStream();
-				
+			
+				byte[] buff = new byte[16*2024];
+				DataOutputStream output =  new DataOutputStream(socket.getOutputStream());
+	    		FileInputStream input = new FileInputStream(file.toString());
+	    		
+	    		output.writeLong(file.length());
+	    		int data;
+	    		while ((data = input.read(buff)) > 0) {
+	    			output.write(buff, 0, data);
+	    		}
+	    		input.close();
+	    		System.out.println( fileName + " has been uploaded successfully.");
 			}
 
 			
+		}
+		
+		private void downloadFile(DataOutputStream out, String[] inputs) throws Exception{
+			if( inputs.length ==1) {
+				out.writeUTF("No file name was typed\n");
+				return;
+			}else {
+				String fileName = inputs[1];
+				String filePath = path+fileName;
+				File file = new File(filePath);
+				
+				if(!(file.isFile())) {
+					out.writeUTF(fileName + " does not exist\n");
+					return;
+				}else {
+					byte[] buff = new byte[16*2024];
+					DataOutputStream output =  new DataOutputStream(socket.getOutputStream());
+		    		FileInputStream input = new FileInputStream(file.toString());
+		    		
+		    		int fileDataSize = input.read();
+		    		int read = 0;
+		    		
+		    		while(fileDataSize > 0 && (read = input.read(buff)) > 0) {
+		    			output.write(buff, 0, read);
+		    			fileDataSize -= read;
+		    		}
+		    		output.close();
+		    		System.out.println(fileName + " downloaded successfully.");	
+				}	
+			}
 		}
 	}
 	//Fonctions en lien avec la validation de l'adresse IP

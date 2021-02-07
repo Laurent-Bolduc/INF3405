@@ -6,6 +6,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileOutputStream;
 
 import javax.imageio.spi.ImageInputStreamSpi;
 
@@ -24,10 +28,12 @@ public class Server {
 		// compteur compte a chaque connexion dun client
 		int clientNumber = 0;
 		
-		//IP address 
 		String serverAddress = "127.168.0.1";
 		int port = 5000;
+		
+		
 		if (!(System.console() == null)) {
+			//IP
 			Server.log("Enter IP Address of the Server:");
 			serverAddress = System.console().readLine();
 			while (!Server.validateIpAddress(serverAddress)){
@@ -45,11 +51,13 @@ public class Server {
 		} 
 		else 
 			System.out.format("No console was found, default values were assigned%n");
+		
         
 		
 		//Assotiation de ladresse et du port a la connexion
-     // creation de la connexion pour communiquer avec les clients
  		InetAddress serverIP = InetAddress.getByName(serverAddress);
+ 		
+ 		//creation of listening socket
  		listener = new ServerSocket();
  		listener.setReuseAddress(true);
 		listener.bind(new InetSocketAddress(serverIP, port));
@@ -124,6 +132,9 @@ public class Server {
 					break;
 				case "mkdir":
 					break;
+				case "upload":
+					uploadFile(out, inputs);
+					break;
 				default:
 					System.out.println("Command not found, type help for help");
 					break;
@@ -140,6 +151,32 @@ public class Server {
 			}
 			System.out.println(inputs[1]);
 		}
+		
+		//Fonciton pour upload un fichier
+		public void uploadFile(DataOutputStream out, String[] inputs) throws Exception {
+			//create socket
+			if (inputs.length == 1) {
+				out.writeUTF("No directory name was typed");
+				return;
+			}else {
+				String fileName = inputs[1];
+				
+				System.out.println(fileName);
+//				Socket socket = new Socket("127.0.0.1", 4444);
+//				
+				File file = new File(fileName);
+				long length = file.length();
+				System.out.println(length);
+//				
+//				byte[] bytes = new byte[16*2024];
+//				
+//				InputStream in = new FileInputStream(file);
+				//OutputStream out = socket.getOutputStream();
+				
+			}
+
+			
+		}
 	}
 	
 	//Fonctions en lien avec la validation de l'adresse IP
@@ -152,15 +189,13 @@ public class Server {
 	
 	
 	//Fonctions en lien avec la validation du port entre 5000 et 5500
-		public static boolean validatePort(final int port) {
-			if (port >= 5000 && port <= 5500){
-				return true;
-			}
-			else {
-				return false;
-			}
+	public static boolean validatePort(final int port) {
+		if (port >= 5000 && port <= 5500){
+			return true;
 		}
-   
-
+		else {
+			return false;
+		}
+	}
 	
 }

@@ -21,8 +21,8 @@ import javax.imageio.spi.ImageInputStreamSpi;
 public class Server {
 	
 	private static ServerSocket listener;
-	private static String path = System.getProperty("user.dir") + "\\";
-	
+	private static String serverPath = System.getProperty("user.dir") + "\\";
+
 	//Fonction pour print sur le server
 	private static void log(String message) {
         System.out.println(message);
@@ -86,6 +86,7 @@ public class Server {
 	private static class ClientHandler extends Thread{
 		private Socket socket;
 		private int clientNumber;
+		private String path = new String(serverPath);
 		
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.socket = socket;
@@ -98,7 +99,6 @@ public class Server {
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				out.writeUTF("Hello from server - you are client#" + clientNumber);		 
-				
 				commandSelector(in, out);
 
 				} catch(Exception e) {
@@ -137,16 +137,21 @@ public class Server {
 					break;
 				case "ls":
 					lsCommand(out, inputs, false);
+					out.writeUTF("\n");
 					break;
 				case "mkdir":
 					mkdirCommand(out, inputs);
 					break;
 				case "upload":
-					uploadFile(out, inputs);
+					uploadCommand(out, inputs);
 					break;
 				case "download":
-					downloadFile(out, inputs);
+					downloadCommand(out, inputs);
 					break;
+				case "exit":
+					System.exit(0);
+				case "help":
+					helpCommand(out);
 				default:
 					out.writeUTF("Command not found, type help for help\n");
 					break;
@@ -184,10 +189,10 @@ public class Server {
 		
 		public void mkdirCommand(DataOutputStream out, String[] inputs) throws Exception {			
 			if (inputs.length == 1) {
-				out.writeUTF("No directory name was typed");
+				out.writeUTF("No directory name was typed\n");
 				return;
 			}
-			File file = new File("C:\\Users\\vlada\\Desktop\\" + inputs[1]);
+			File file = new File(path + inputs[1]);
 			
 			if(file.mkdir()) {
 				System.out.println("work");
@@ -212,7 +217,6 @@ public class Server {
 				else if (listOfFiles[i].isFile()) {
 					System.out.println("File " + listOfFiles[i].getName());
 					out.writeUTF("File " + listOfFiles[i].getName());
-
 				} 
 				else if (listOfFiles[i].isDirectory()) {
 					System.out.println("Directory " + listOfFiles[i].getName());
@@ -223,7 +227,7 @@ public class Server {
 		}
 		
 		//Fonciton pour upload un fichier
-		public void uploadFile(DataOutputStream out, String[] inputs) throws Exception {
+		public void uploadCommand(DataOutputStream out, String[] inputs) throws Exception {
 			//create socket
 			if (inputs.length == 1) {
 				out.writeUTF("No directory name was typed\n");
@@ -255,7 +259,7 @@ public class Server {
 			
 		}
 		
-		private void downloadFile(DataOutputStream out, String[] inputs) throws Exception{
+		private void downloadCommand(DataOutputStream out, String[] inputs) throws Exception{
 			if( inputs.length ==1) {
 				out.writeUTF("No file name was typed\n");
 				return;
@@ -283,6 +287,10 @@ public class Server {
 		    		System.out.println(fileName + " downloaded successfully.");	
 				}	
 			}
+		}
+		
+		private void helpCommand(DataOutputStream out) throws Exception {
+			
 		}
 	}
 	//Fonctions en lien avec la validation de l'adresse IP

@@ -2,6 +2,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 
@@ -92,13 +93,42 @@ public class Client
 		System.out.println(helloMessageFromServer);
 		
 		while (true) {
-			out.writeUTF(System.console().readLine());		 
-			String serverComs = in.readUTF();
-			if (!serverComs.isEmpty())
+			String currentCommand = "";
+			currentCommand = System.console().readLine();
+			if (currentCommand == "") continue;
+			out.writeUTF(currentCommand);
+			commandCompletion(in, out, currentCommand);
+			TimeUnit.MILLISECONDS.sleep(10);
+			while(in.available() != 0)
+			{
+				String serverComs = in.readUTF();
+				if (serverComs.isEmpty()) break;
 				System.out.println(serverComs);
+			}
 		}
 
 		// Fermeture de la connexion avec le serveur
+	}
+	
+	public static void commandCompletion(DataInputStream in, DataOutputStream out, String currentCommand) throws Exception {
+		String[] inputs = new String[] {};
+		try { inputs = currentCommand.split(" "); } catch(Exception e) {}
+
+		if (inputs.length == 0) return;
+			
+		switch(inputs[0]) {
+			case "upload":
+				//a function that uses sockets to send files
+				break;
+			case "download":
+				//a function that uses sockets to receive files
+				break;
+			case "exit":
+				System.exit(0);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	private static final Pattern PATTERN = Pattern.compile(

@@ -1,41 +1,35 @@
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.regex.Pattern;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.FileOutputStream;
+import java.time.*;
 
-import javax.imageio.spi.ImageInputStreamSpi;
 
 public class Server {
 	
 	private static ServerSocket listener;
 	private static String serverPath = System.getProperty("user.dir") + "\\";
+	private static String serverAddress = "127.168.0.1";
+	private static int port = 5000;
 
 	//Fonction pour print sur le server
 	private static void log(String message) {
-        System.out.println(message);
+        System.out.print("deez nuts");
+		System.out.println(message);
     }
 
 	public static void main(String[] args) throws Exception
 	{
 		// compteur compte a chaque connexion dun client
 		int clientNumber = 0;
-		
-		String serverAddress = "127.168.0.1";
-		int port = 5000;
-		
 		
 		if (!(System.console() == null)) {
 			//IP
@@ -122,11 +116,12 @@ public class Server {
 
 				if (line == "") {
 					try {
-					line = in.readUTF();
-					inputs = line.split(" ");
-					//Debug
-					System.out.println(line);
+						line = in.readUTF();
+						inputs = line.split(" ");
+						//Debug
+						System.out.println("[" + serverAddress + ":" + port + " - " + java.time.LocalDate.now() + "@" + java.time.LocalTime.now().getHour() + ":" + java.time.LocalTime.now().getMinute() + ":" + java.time.LocalTime.now().getSecond() + "] : " + line);
 					} catch(Exception e) {
+						
 					}
 				}
 				if (inputs.length == 0) continue;
@@ -260,7 +255,7 @@ public class Server {
 		}
 		
 		private void downloadCommand(DataOutputStream out, String[] inputs) throws Exception{
-			if( inputs.length ==1) {
+			if(inputs.length ==1) {
 				out.writeUTF("No file name was typed\n");
 				return;
 			}else {

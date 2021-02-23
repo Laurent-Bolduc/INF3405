@@ -4,6 +4,8 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 public class Client 
@@ -121,7 +123,7 @@ public class Client
 				//a function that uses sockets to send files
 				break;
 			case "download":
-				//a function that uses sockets to receive files
+				downloadFile(socket, inputs[1]);
 				break;
 			case "exit":
 				System.exit(0);
@@ -149,4 +151,20 @@ public class Client
 			return false;
 		}
 	}
+	
+    // Download file from server from where server location to where client jar file is run.
+    private static void downloadFile(Socket sock, String fileName) throws IOException {
+    	
+		DataInputStream dis = new DataInputStream(sock.getInputStream());
+		FileOutputStream fos = new FileOutputStream(fileName);
+		byte[] buffer = new byte[4096];
+		long fileSize = dis.readLong();
+		int read = 0;
+		// While there is bytes in the dis, we empty them in the file.
+		while(fileSize > 0 && (read = dis.read(buffer)) > 0) {
+			fos.write(buffer, 0, read);
+			fileSize -= read;
+		}
+		fos.close();
+    }
 }

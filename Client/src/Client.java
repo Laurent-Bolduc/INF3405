@@ -6,11 +6,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
 
 
 public class Client 
 {
 	private static Socket socket;
+	private static String clientPath = System.getProperty("user.dir") + "\\";
+	
 	
 	//Fonction pour print sur le server
 	private static void log(String message) {
@@ -155,11 +158,18 @@ public class Client
     // Download file from server from where server location to where client jar file is run.
     private static void downloadFile(Socket sock, String fileName) throws IOException {
     	
+    	String path = clientPath + "\\download";
+		File downloadFolder = new File(path);
+		downloadFolder.mkdir();
+		
 		DataInputStream dis = new DataInputStream(sock.getInputStream());
-		FileOutputStream fos = new FileOutputStream(fileName);
+		FileOutputStream fos = new FileOutputStream(path + "\\" +fileName);
 		byte[] buffer = new byte[4096];
 		long fileSize = dis.readLong();
 		int read = 0;
+		
+		
+		
 		// While there is bytes in the dis, we empty them in the file.
 		while(fileSize > 0 && (read = dis.read(buffer)) > 0) {
 			fos.write(buffer, 0, read);

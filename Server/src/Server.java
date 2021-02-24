@@ -18,12 +18,11 @@ public class Server {
 	
 	private static ServerSocket listener;
 	private static String serverPath = System.getProperty("user.dir") + "\\";
-	private static String serverAddress = "127.168.0.1";
+	private static String serverAddress = "127.0.0.1";
 	private static int port = 5000;
 
 	//Fonction pour print sur le server
 	private static void log(String message) {
-        System.out.print("deez nuts");
 		System.out.println(message);
     }
 
@@ -251,13 +250,9 @@ public class Server {
 //	    		input.close();
 //	    		System.out.println( fileName + " has been uploaded successfully.");
 //			}
-			
-			String path = serverPath + "\\upload";
-			File downloadFolder = new File(path);
-			downloadFolder.mkdir();
-			
+						
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
-			FileOutputStream fos = new FileOutputStream(path + "\\" + inputs[1]);
+			FileOutputStream fos = new FileOutputStream(path + inputs[1]);
 			byte[] buffer = new byte[4096];
 			long fileSize = dis.readLong();
 			int read = 0;
@@ -269,6 +264,7 @@ public class Server {
 				fos.write(buffer, 0, read);
 				fileSize -= read;
 			}
+			dis.close();
 			fos.close();
 
 			
@@ -298,6 +294,7 @@ public class Server {
 		    			output.write(buff, 0, read);
 		    			fileDataSize -= read;
 		    		}
+		    		input.close();
 		    		output.close();
 		    		System.out.println(fileName + " downloaded successfully.");	
 				}	

@@ -21,50 +21,10 @@ public class Client
         System.out.println(message);
     }
 	
-
-	/*
-	 * Application Client
-	 */
-	public static void askIp() {
-		Scanner userInput = new Scanner(System.in);
-		
-		String ipAdress = "";
-		boolean inputValid = false;
-		
-		System.out.print("Veulliez entrer l'adress IP \n");
-		
-		while(!inputValid) {
-			ipAdress = userInput.nextLine();
-			inputValid = validateIpAddress(ipAdress);
-		}
-		
-		userInput.close();
-		System.out.print(ipAdress);
-	}
-	
-	public static void askPort() {
-		Scanner userInput = new Scanner(System.in);
-		
-		int port = 0;
-		boolean inputValid = false;
-		
-		System.out.print("Veuillez entrer le port \n");
-		
-		while(!inputValid) {
-			port = userInput.nextInt();
-			if(port >=  5000 && port <= 5050) {
-				inputValid = true;
-			}
-		}	
-
-		userInput.close();
-		System.out.print(inputValid);
-	} 
-	
 	public static void main(String[] args) throws Exception
 	{
 		//IP address 
-		String serverAddress = "127.168.0.1";
+		String serverAddress = "127.0.0.1";
 		int port = 5000;
 		if (!(System.console() == null)) {
 			Client.log("Enter IP Address of the Server:");
@@ -99,12 +59,13 @@ public class Client
 		System.out.println(helloMessageFromServer);
 		
 		while (true) {
+			System.out.print("> ");
 			String currentCommand = "";
 			currentCommand = System.console().readLine();
 			if (currentCommand == "") continue;
 			out.writeUTF(currentCommand);
 			commandCompletion(in, out, currentCommand);
-			TimeUnit.MILLISECONDS.sleep(10);
+			TimeUnit.MILLISECONDS.sleep(100);
 			while(in.available() != 0)
 			{
 				String serverComs = in.readUTF();
@@ -124,10 +85,10 @@ public class Client
 			
 		switch(inputs[0]) {
 			case "upload":
-				uploadFile(socket, inputs[1]);
+				uploadFile(out, inputs[1]);
 				break;
 			case "download":
-				downloadFile(socket, inputs[1]);
+				downloadFile(in, inputs[1]);
 				break;
 			case "exit":
 				System.exit(0);
@@ -157,22 +118,17 @@ public class Client
 	}
 	
     // Download file from server from where server location to where client jar file is run.
-    private static void downloadFile(Socket sock, String fileName) throws IOException {
+    private static void downloadFile(DataInputStream in, String fileName) throws IOException {
     	
-    	String path = clientPath + "\\download";
-		File downloadFolder = new File(path);
-		downloadFolder.mkdir();
-		
-		DataInputStream dis = new DataInputStream(sock.getInputStream());
-		FileOutputStream fos = new FileOutputStream(path + "\\" +fileName);
+		FileOutputStream fos = new FileOutputStream(clientPath + "\\" + fileName);
 		byte[] buffer = new byte[4096];
-		long fileSize = dis.readLong();
+		long fileSize = in.readLong();
 		int read = 0;
 		
 		
 		
-		// While there is bytes in the dis, we empty them in the file.
-		while(fileSize > 0 && (read = dis.read(buffer)) > 0) {
+		// While there is bytes in the in, we empty them in the file.
+		while(fileSize > 0 && (read = in.read(buffer)) > 0) {
 			fos.write(buffer, 0, read);
 			fileSize -= read;
 		}
@@ -180,22 +136,20 @@ public class Client
     }
     
     // Upload file to server from where client jar file is run to where server jar file is run.
-    private static void uploadFile(Socket sock, String fileName) throws IOException {
+    private static void uploadFile(DataOutputStream out, String fileName) throws IOException {
    		
     	File file = new File(clientPath + "\\" + fileName);
     	System.out.print(file.toString());
     	if(!(file.isFile())) {
-			System.out.print("large penis");
 			return;
 		}
-		DataOutputStream output = new DataOutputStream(sock.getOutputStream());
 		FileInputStream input = new FileInputStream(file.toString());
 		byte[] buffer = new byte[16*2024];
 		int fileDataSize = input.read();
 		int read = 0;
 		
 		while(fileDataSize > 0 && (read = input.read(buffer)) > 0) {
-			output.write(buffer, 0, read);
+			out.write(buffer, 0, read);
 			fileDataSize -= read;
 		}
 		input.close();

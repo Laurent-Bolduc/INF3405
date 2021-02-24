@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.time.*;
 
 
@@ -224,32 +225,51 @@ public class Server {
 		//Fonciton pour upload un fichier
 		public void uploadCommand(DataOutputStream out, String[] inputs) throws Exception {
 			//create socket
-			if (inputs.length == 1) {
-				out.writeUTF("No directory name was typed\n");
-				return;
-			}else {
-				String fileName = inputs[1];
-				String filePath = path+fileName;
-				
-				System.out.println(fileName);
-				System.out.println(filePath);
-				
-				File file = new File(filePath);
-				long length = file.length();
-				System.out.println(length);
+//			if (inputs.length == 1) {
+//				out.writeUTF("No directory name was typed\n");
+//				return;
+//			}else {
+//				String fileName = inputs[1];
+//				String filePath = path+ "\\" + fileName;
+//				
+//				System.out.println(fileName);
+//				System.out.println(filePath);
+//				
+//				File file = new File(filePath);
+//				long length = file.length();
+//				System.out.println(length);
+//			
+//				byte[] buff = new byte[16*2024];
+//				DataOutputStream output =  new DataOutputStream(socket.getOutputStream());
+//	    		FileInputStream input = new FileInputStream(file.toString());
+//	    		
+//	    		output.writeLong(file.length());
+//	    		int data;
+//	    		while ((data = input.read(buff)) > 0) {
+//	    			output.write(buff, 0, data);
+//	    		}
+//	    		input.close();
+//	    		System.out.println( fileName + " has been uploaded successfully.");
+//			}
 			
-				byte[] buff = new byte[16*2024];
-				DataOutputStream output =  new DataOutputStream(socket.getOutputStream());
-	    		FileInputStream input = new FileInputStream(file.toString());
-	    		
-	    		output.writeLong(file.length());
-	    		int data;
-	    		while ((data = input.read(buff)) > 0) {
-	    			output.write(buff, 0, data);
-	    		}
-	    		input.close();
-	    		System.out.println( fileName + " has been uploaded successfully.");
+			String path = serverPath + "\\upload";
+			File downloadFolder = new File(path);
+			downloadFolder.mkdir();
+			
+			DataInputStream dis = new DataInputStream(socket.getInputStream());
+			FileOutputStream fos = new FileOutputStream(path + "\\" + inputs[1]);
+			byte[] buffer = new byte[4096];
+			long fileSize = dis.readLong();
+			int read = 0;
+			
+			
+			
+			// While there is bytes in the dis, we empty them in the file.
+			while(fileSize > 0 && (read = dis.read(buffer)) > 0) {
+				fos.write(buffer, 0, read);
+				fileSize -= read;
 			}
+			fos.close();
 
 			
 		}

@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.File;
+import java.io.FileInputStream;
 
 
 public class Client 
@@ -123,7 +124,7 @@ public class Client
 			
 		switch(inputs[0]) {
 			case "upload":
-				//a function that uses sockets to send files
+				uploadFile(socket, inputs[1]);
 				break;
 			case "download":
 				downloadFile(socket, inputs[1]);
@@ -176,5 +177,27 @@ public class Client
 			fileSize -= read;
 		}
 		fos.close();
+    }
+    
+    // Upload file to server from where client jar file is run to where server jar file is run.
+    private static void uploadFile(Socket sock, String fileName) throws IOException {
+   		
+    	File file = new File(clientPath + "\\" + fileName);
+    	System.out.print(file.toString());
+    	if(!(file.isFile())) {
+			System.out.print("large penis");
+			return;
+		}
+		DataOutputStream output = new DataOutputStream(sock.getOutputStream());
+		FileInputStream input = new FileInputStream(file.toString());
+		byte[] buffer = new byte[16*2024];
+		int fileDataSize = input.read();
+		int read = 0;
+		
+		while(fileDataSize > 0 && (read = input.read(buffer)) > 0) {
+			output.write(buffer, 0, read);
+			fileDataSize -= read;
+		}
+		input.close();
     }
 }

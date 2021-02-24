@@ -126,7 +126,6 @@ public class Client
 		int read = 0;
 		
 		
-		
 		// While there is bytes in the in, we empty them in the file.
 		while(fileSize > 0 && (read = in.read(buffer)) > 0) {
 			fos.write(buffer, 0, read);

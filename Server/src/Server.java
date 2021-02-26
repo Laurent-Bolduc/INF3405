@@ -1,24 +1,17 @@
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.time.*;
 
 public class Server {
 
@@ -251,6 +244,7 @@ public class Server {
 	    	byte[] buffer = new byte[8192];
 
 	        int count;
+	        //reads the socket to write in the file
 	        while ((count = in.read(buffer)) > 0) {
 	            fos.write(buffer, 0, count);
 	            if (in.available() == 0) {
@@ -265,17 +259,19 @@ public class Server {
 		private void downloadCommand(DataOutputStream out, String[] inputs) throws Exception {
 			// verifies that the user entered the name of the file to download 
 			if (inputs.length == 1) return;
+			
+			//checks if the file is present
 			if (!lsCommand(out, inputs, false, true).contains(inputs[1])) {
 				TimeUnit.MILLISECONDS.sleep(1000);
 				out.writeUTF("No file with that name was found in the current folder");
 				return;
 			}
 			File file = new File(path + inputs[1]);
-		    // Get the size of the file
 		    byte[] buffer = new byte[8192];
 		    InputStream fis = new FileInputStream(file);
 		    
 		    int count;
+	        //reads the file to write in the socket
 	        while ((count = fis.read(buffer)) > 0) {
 	            out.write(buffer, 0, count);
 	        }

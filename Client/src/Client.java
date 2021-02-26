@@ -1,17 +1,12 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -111,6 +106,8 @@ public class Client
 			System.out.println("No file name was typed");
 			return;
 		}
+		
+		//checks if the file is present
 		if (!fileSearch().contains(inputs[1])) {
 			TimeUnit.MILLISECONDS.sleep(1000);
 			System.out.println("No file with that name was found on the client");
@@ -122,6 +119,7 @@ public class Client
 	    InputStream fis = new FileInputStream(file);
 	    
 	    int count;
+        //reads the file to write in the socket
         while ((count = fis.read(buffer)) > 0) {
             out.write(buffer, 0, count);
         }
@@ -139,6 +137,8 @@ public class Client
 			System.out.println("No file name was typed");
 			return;
 		}
+		
+		//checks if the server found the file
         if (in.available() == 0) {
 			TimeUnit.MILLISECONDS.sleep(100);
             if (in.available() == 0) {
@@ -152,6 +152,7 @@ public class Client
 
         int count;
         
+        //reads the socket to write in the file
         while ((count = in.read(buffer)) > 0) {
             fos.write(buffer, 0, count);
             if (in.available() == 0) {

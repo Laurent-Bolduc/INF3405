@@ -248,11 +248,11 @@ public class Server {
 			File file = new File(path + inputs[1]);
 			
 			FileOutputStream fos = new FileOutputStream(file);
-	    	byte[] bytes = new byte[16*1024];
+	    	byte[] buffer = new byte[8192];
 
 	        int count;
-	        while ((count = in.read(bytes)) > 0) {
-	            fos.write(bytes, 0, count);
+	        while ((count = in.read(buffer)) > 0) {
+	            fos.write(buffer, 0, count);
 	            if (in.available() == 0) {
 	    			TimeUnit.MILLISECONDS.sleep(100);
 	                if (in.available() == 0) break;
@@ -272,13 +272,12 @@ public class Server {
 			}
 			File file = new File(path + inputs[1]);
 		    // Get the size of the file
-		    long length = file.length();
-		    byte[] bytes = new byte[16 * 1024];
+		    byte[] buffer = new byte[8192];
 		    InputStream fis = new FileInputStream(file);
 		    
 		    int count;
-	        while ((count = fis.read(bytes)) > 0) {
-	            out.write(bytes, 0, count);
+	        while ((count = fis.read(buffer)) > 0) {
+	            out.write(buffer, 0, count);
 	        }
 			TimeUnit.MILLISECONDS.sleep(500);
 

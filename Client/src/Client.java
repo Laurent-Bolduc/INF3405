@@ -1,11 +1,14 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -118,20 +121,46 @@ public class Client
 	}
 	
     // Download file from server from where server location to where client jar file is run.
-    private static void downloadFile(DataInputStream in, String fileName) throws IOException {
+    private static void downloadFile(DataInputStream in, String fileName) throws Exception {
     	
 		FileOutputStream fos = new FileOutputStream(clientPath + "\\" + fileName);
-		byte[] buffer = new byte[4096];
-		long fileSize = in.readLong();
-		int read = 0;
+		
+		//byte[] buffer = new byte[16*2024];
+		//byte[] buffer = in.readAllBytes();
+		
+		//long fileSize = in.readLong();
+		//System.out.print(fileSize);
+		//int read = 0;
 		
 		
+		//ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(clientPath + "\\" + fileName));
+		ObjectInputStream ois = new ObjectInputStream(in);
 		
-		// While there is bytes in the in, we empty them in the file.
-		while(fileSize > 0 && (read = in.read(buffer)) > 0) {
-			fos.write(buffer, 0, read);
-			fileSize -= read;
+		//flush out
+		
+		if(in.readBoolean()) {
+			byte [] buffer = (byte[]) ois.readObject();
+//			System.out.print(ois.readObject());
+			File downloadedFile = new File(clientPath + "\\" + fileName);
+			Files.write(downloadedFile.toPath(), buffer);
+			System.out.print(ois.readObject());
+		}else {
+			System.out.print("hey ptit queue ca marche pas!!");
 		}
+		
+		
+		//fos.write(buffer);
+		// While there is bytes in the in, we empty them in the file.
+//		while(fileSize > 0 && (read = in.read(buffer)) > 0) {
+//			fos.write(buffer, 0, read);
+//			fileSize -= read;
+//		}
+		//ois.writeObject(buffer);
+//		int count;
+//        while ((count = in.read(buffer)) > 0) {
+//            fos.write(buffer, 0, count);
+//        }
+		ois.close();
 		fos.close();
     }
     

@@ -2,12 +2,15 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.regex.Pattern;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -283,20 +286,29 @@ public class Server {
 					out.writeUTF(fileName + " does not exist\n");
 					return;
 				}else {
-					byte[] buff = new byte[16*2024];
-					DataOutputStream output =  new DataOutputStream(socket.getOutputStream());
+					byte[] buff = Files.readAllBytes(file.toPath());
+					ObjectOutputStream output =  new ObjectOutputStream(out);
 		    		FileInputStream input = new FileInputStream(file.toString());
 		    		
 		    		int fileDataSize = input.read();
-		    		int read = 0;
+		    		System.out.print(buff);
+		    			
+		    		output.writeObject(buff);
+//		    		while(fileDataSize > 0 && (read = input.read(buff)) > 0) {
+//		    			output.write(buff, 0, read);
+//		    			fileDataSize -= read;
+//		    		}
 		    		
-		    		while(fileDataSize > 0 && (read = input.read(buff)) > 0) {
-		    			output.write(buff, 0, read);
-		    			fileDataSize -= read;
-		    		}
-		    		input.close();
-		    		output.close();
-		    		System.out.println(fileName + " downloaded successfully.");	
+//		    		int count ;
+//		            while ((count = input.read(buff)) >= 0) {
+//		                out.write(buff, 0, count);
+//		                System.out.write(buff, 0, count);
+//		                
+//		            }
+		            
+//		    		input.close();
+//		    		output.close();
+//		    		System.out.println(fileName + " downloaded successfully.");	
 				}	
 			}
 		}

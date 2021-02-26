@@ -12,8 +12,12 @@ import java.util.regex.Pattern;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.*;
 
 public class Server {
@@ -129,14 +133,14 @@ public class Server {
 						cdCommand(out, inputs);
 						break;
 					case "ls":
-						lsCommand(out, inputs, false);
+						lsCommand(out, inputs, false, false);
 						out.writeUTF("\n");
 						break;
 					case "mkdir":
 						mkdirCommand(out, inputs);
 						break;
 					case "upload":
-						uploadCommand(out, inputs);
+						uploadCommand(in, out, inputs);
 						break;
 					case "download":
 						downloadCommand(out, inputs);
@@ -173,7 +177,7 @@ public class Server {
 				}
 				path = newPath;
 				System.out.println("HEAD on " + splitPath[splitPath.length - 2]);
-			} else if (!lsCommand(out, inputs, true).contains(inputs[1])) {
+			} else if (!lsCommand(out, inputs, true, false).contains(inputs[1])) {
 				// error message if the directory is not found 
 				out.writeUTF("No directory with that name was found\n");
 				return;
@@ -208,17 +212,21 @@ public class Server {
 
 		// From
 		// https://stackoverflow.com/questions/5694385/getting-the-filenames-of-all-files-in-a-folder#:~:text=Create%20a%20File%20object%2C%20passing,method%20to%20get%20the%20filename.
-		public List<String> lsCommand(DataOutputStream out, String[] inputs, boolean isCd) throws Exception {
+		public List<String> lsCommand(DataOutputStream out, String[] inputs, boolean isCd, boolean isDownload) throws Exception {
 			File currentFolder = new File(path);
 			// get all the files
 			File[] listOfFiles = currentFolder.listFiles();
-			List<String> directories = new ArrayList<String>();
+			List<String> files = new ArrayList<String>();
 			// loop through all the files 
 			for (int i = 0; i < listOfFiles.length; i++) {
-				// JCOMPRENDS PAS CA
+				// returns a list of files for cd validation
 				if (isCd) {
 					if (listOfFiles[i].isDirectory())
-						directories.add(listOfFiles[i].getName());
+						files.add(listOfFiles[i].getName());
+				// returns a list of files for download validation
+				} else if (isDownload) {
+					if (listOfFiles[i].isFile())
+						files.add(listOfFiles[i].getName());
 				} else if (listOfFiles[i].isFile()) {
 					// if it is a file, it prints as a file
 					out.writeUTF("File " + listOfFiles[i].getName());
@@ -227,74 +235,59 @@ public class Server {
 					out.writeUTF("Directory " + listOfFiles[i].getName());
 				}
 			}
-			return directories;
+			return files;
 		}
 
-		public void uploadCommand(DataOutputStream out, String[] inputs) throws Exception {
-			// get the input stream form the socket
-			DataInputStream dis = new DataInputStream(socket.getInputStream());
-			// create the output stream of the file data
-			FileOutputStream fos = new FileOutputStream(path + inputs[1]);
-			byte[] buffer = new byte[4096];
-			long fileSize = dis.readLong();
-			int read = 0;
+		public void uploadCommand(DataInputStream in, DataOutputStream out, String[] inputs) throws Exception {
+			// verifies that the user entered the name of the file to upload 
+			if (inputs.length == 1) return;
+			if (in.available() == 0) {
+				TimeUnit.MILLISECONDS.sleep(100);
+	            if (in.available() == 0) return;
+	        }
+			File file = new File(path + inputs[1]);
+			
+			FileOutputStream fos = new FileOutputStream(file);
+	    	byte[] bytes = new byte[16*1024];
 
-			// while there are bytes in the dis, we read them and write them in the fos
-			while (fileSize > 0 && (read = dis.read(buffer)) > 0) {
-				fos.write(buffer, 0, read);
-				fileSize -= read;
-			}
-			// close the the dis and the fos
-			dis.close();
-			fos.close();
-
+	        int count;
+	        while ((count = in.read(bytes)) > 0) {
+	            fos.write(bytes, 0, count);
+	            if (in.available() == 0) {
+	    			TimeUnit.MILLISECONDS.sleep(100);
+	                if (in.available() == 0) break;
+	            }
+	        }
+	        
+	        fos.close();
 		}
 
 		private void downloadCommand(DataOutputStream out, String[] inputs) throws Exception {
 			// verifies that the user entered the name of the file to download 
-			if (inputs.length == 1) {
-				out.writeUTF("No file name was typed\n");
+			if (inputs.length == 1) return;
+			if (!lsCommand(out, inputs, false, true).contains(inputs[1])) {
+				TimeUnit.MILLISECONDS.sleep(1000);
+				out.writeUTF("No file with that name was found in the current folder");
 				return;
-			} else {
-				String fileName = inputs[1];
-				String filePath = path + fileName;
-				File file = new File(filePath);
-
-				// verifies that the user entered an existing file
-				if (!(file.isFile())) {
-					out.writeUTF(fileName + " does not exist\n");
-					return;
-				}else {
-					byte[] buff = Files.readAllBytes(file.toPath());
-					ObjectOutputStream output =  new ObjectOutputStream(out);
-		    		FileInputStream input = new FileInputStream(file.toString());
-		    		
-		    		int fileDataSize = input.read();
-		    		System.out.print(buff);
-		    			
-		    		output.writeObject(buff);
-//		    		while(fileDataSize > 0 && (read = input.read(buff)) > 0) {
-//		    			output.write(buff, 0, read);
-//		    			fileDataSize -= read;
-//		    		}
-		    		
-//		    		int count ;
-//		            while ((count = input.read(buff)) >= 0) {
-//		                out.write(buff, 0, count);
-//		                System.out.write(buff, 0, count);
-//		                
-//		            }
-		            
-//		    		input.close();
-//		    		output.close();
-//		    		System.out.println(fileName + " downloaded successfully.");	
-				}	
 			}
+			File file = new File(path + inputs[1]);
+		    // Get the size of the file
+		    long length = file.length();
+		    byte[] bytes = new byte[16 * 1024];
+		    InputStream fis = new FileInputStream(file);
+		    
+		    int count;
+	        while ((count = fis.read(bytes)) > 0) {
+	            out.write(bytes, 0, count);
+	        }
+			TimeUnit.MILLISECONDS.sleep(500);
+
+	        fis.close();
 		}
 
 		// prints the different commands that are available
 		private void helpCommand(DataOutputStream out) throws Exception {
-			out.writeUTF("ls : lists every files in current directory \ncd : change the current directory\nmkdir : create a new directory \ndownload : download a file from the Server to the Client \nupload : upload a file from the Client to the Server\n");
+			out.writeUTF("ls : lists every files in current directory \ncd : change the current directory\nmkdir : create a new directory \ndownload : download a file from the Server to the Client \nupload : upload a file from the Client to the Server\nexit : end the server process\n");
 		}
 	}
 
@@ -309,7 +302,7 @@ public class Server {
 
 	// validation of the port
 	public static boolean validatePort(final int port) {
-		if (port >= 5000 && port <= 5500) {
+		if (port >= 5000 && port <= 5050) {
 			return true;
 		} else {
 			return false;

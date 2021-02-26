@@ -71,7 +71,7 @@ public class Client
 			if (currentCommand == "") continue;
 			out.writeUTF(currentCommand);
 			commandCompletion(in, out, currentCommand);
-			TimeUnit.MILLISECONDS.sleep(100);
+			TimeUnit.MILLISECONDS.sleep(500);
 			while(in.available() != 0)
 			{
 				String serverComs = in.readUTF();
